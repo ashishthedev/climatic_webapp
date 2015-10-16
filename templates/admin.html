@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+{% block title %}
+Admin | Climatic Adaptation
+{% endblock %}
+{% block head %}
+{{ super() }}
+{% include 'angular.html' %}
+
+<script src="/static/js/services.js"></script>
+
+<script>
+var appMod = angular.module('clapp', ['clAppServices']);
+
+appMod.config(function($interpolateProvider) {
+  $interpolateProvider.startSymbol('||');
+  $interpolateProvider.endSymbol('||');
+});
+appMod.directive("fileread", [function () {
+  return {
+    scope: {
+      fileread: "="
+    },
+    link: function (scope, element, attributes) {
+      element.bind("change", function (changeEvent) {
+        var reader = new FileReader();
+        reader.onload = function (loadEvent) {
+          scope.$apply(function () {
+            scope.fileread = loadEvent.target.result;
+          });
+        }
+        reader.readAsDataURL(changeEvent.target.files[0]);
+      });
+    }
+  }
+}]);
+
+appMod.service('fileUpload', ['$http', function ($http) {
+  this.uploadFileToUrl = function(file, uploadUrl){
+    var fd = new FormData();
+    fd.append('file', file);
+    $http.post(uploadUrl, fd, {
+      transformRequest: angular.identity,
+            headers: {'Content-Type': undefined}//TODO: Checkout if content-type can be left alone?
+          })
+    .success(function(){
+    })
+    .error(function(){
+    });
+  }
+}]);
+
+appMod.controller('mod1Controller', ['$scope', '$http', 'DeliverableRes', 'DeliverablesForMod', 'UploadUrlForDeliverable', function($scope, $http, DeliverableRes, DeliverablesForMod, UploadUrlForDeliverable) {
+  $scope.deliverable={
+    "type":"File",
+    "moduleName":"module1",
+    "file":null,
+  };
+
+  $scope.addPlaceholder = function(d){
+    DeliverableRes.save(d, function(data){
+     $scope.statusNote = "Placeholder added...";
+     FetchExistingDeliverablesForModule1();
+     d.title="";
+     return;
+   }, function(error){
+     $scope.statusNote = error.status + ": " + error.data;
+   });
+  }
+
+  $scope.UploadFileForDeliverable = function(d){
+    var file = d.fileContents;
+    var uploadUrl = UploadUrlForDeliverable.get({"moduleName": d.moduleName, "title": d.title}, function(data){
+     $scope.statusNote = "Got upload url and it is: " + uploadUrl;
+   }, function(error){
+     $scope.statusNote = error.status + ": " + error.data;
+   });
+    fileUpload.uploadFileToUrl(file, uploadUrl);
+    $scope.statusNote = "File uploaded...";
+  }
+
+  $scope.DeleteDeliverable = function(d){
+    DeliverableRes.remove({"moduleName":d.moduleName, "title":d.title}, function(data){
+      $scope.statusNote = "Removed";
+      FetchExistingDeliverablesForModule1();
+    }, function(error){
+     $scope.statusNote = error.status + ": " + error.data;
+   });
+  }
+
+  function FetchExistingDeliverablesForModule1(){
+    $scope.module1Dels = DeliverablesForMod.query({moduleName:'module1'});
+  }
+
+  FetchExistingDeliverablesForModule1();
+}]);
+
+</script>
+{% endblock %}
+
+{% block body %}
+<div ng-app="clapp">
+
+  <div ng-controller="mod1Controller">
+    <div id="statusNote" ng-bind="statusNote"></div>
+    <legend>Module 1 - Orientation</legend>
+    <div class="row">
+      <div class="container">
+        <ul ng-repeat="d in module1Dels" class="list-unstyled">
+          <li>
+            <div class="row">
+              <span class="col-xs-3"><button class="btn btn-danger btn-small" ng-click="DeleteDeliverable(d)">X</button></span>
+              <span class="col-xs-3">|| d.title ||</span>
+              <span class="col-xs-3"><input type="file" class="btn" fileread="d.fileContents" ng-click="UploadFileForDeliverable(d)">Upload file</input></span>
+              <span class="col-xs-3"><button class="btn">Remove file</button></span>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <div class="col-sm-6 col-xs-12">
+        <input class="form-control" placeholder="Title of the deliverable..." ng-model="deliverable.title"></select>
+      </div>
+      <div ng-show="deliverable.title" class="col-sm-6 col-xs-12">
+        <button class="btn col-xs-12 btn-warning" ng-click="addPlaceholder(deliverable)"> Add Placeholder</button>
+      </div>
+      <div ng-show="false">
+        <div class="col-sm-6 col-xs-12">
+          <input type="file" fileread="deliverable.fileContents" class="form-control"/>
+        </div>
+        <div class="col-sm-6 col-xs-12">
+          <div ng-if="deliverable.title && deliverable.fileContents" >
+            <button class="btn col-xs-12 btn-warning"> Upload File</button>
+          </div><!-- ngif-->
+          <div ng-if="deliverable.title && !deliverable.fileContents" >
+            <button class="btn col-xs-12 btn-warning" ng-click="addPlaceholder('module1', deliverable)"> Add Placeholder</button>
+          </div><!-- ngif-->
+        </div>
+      </div>
+    </div><!-- row -->
+  </div> <!-- mod1Controller -->
+</div>
+{% endblock %}
