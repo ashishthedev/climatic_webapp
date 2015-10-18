@@ -1,5 +1,5 @@
 *.pyc
-*.swp
+*.sw[po]
 # don't include third-party dependencies.
 lib/
 !lib/README.md

@@ -72,7 +72,8 @@ appMod.controller('mod1Controller', ['$scope', '$http', 'DeliverableRes', 'Deliv
     var uploadUrl = UploadUrlForDeliverable.get({"moduleName": d.moduleName, "title": d.title}, function(data){
       $scope.statusNote = "Got upload url and it is: " + uploadUrl;
       }, function(error){
-      $scope.statusNote = error.status + ": " + error.data;
+      //TODO: Unsupress the error once the functionality is in.
+      //$scope.statusNote = error.status + ": " + error.data;
       });
     fileUpload.uploadFileToUrl(file, uploadUrl);
     $scope.statusNote = "File uploaded...";
@@ -109,7 +110,7 @@ appMod.controller('mod1Controller', ['$scope', '$http', 'DeliverableRes', 'Deliv
           <li>
           <div class="row">
             <span class="col-xs-3">|| d.title ||</span>
-            <span class="col-xs-4"><input type="file" class="btn" fileread="d.fileContents" ng-click="UploadFileForDeliverable(d)">Upload file</input></span>
+            <span class="col-xs-4"><input type="file" class="btn" fileread="d.fileContents" ng-click="UploadFileForDeliverable(d)"></input></span>
             <span class="col-xs-4"><button class="btn">Remove file</button></span>
             <span class=" pull-right col-xs-1">
               <a ng-click="DeleteDeliverable(d)" href="#">
