@@ -2,7 +2,10 @@
 <head>
 {% block head %}
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script src="/static/js/bootstrap.min.js"></script>
 <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+<link rel="stylesheet" href="/static/css/theme.min.css">
 <link rel="stylesheet" href="/static/css/style.css">
 <title>{% block title %}{{ title }} {% endblock %}</title>
 {% endblock %}
@@ -12,7 +15,7 @@
 <div class="navbar navbar-inverse" role="navigation">
   <div class="container">
     <div class="navbar-header">
-      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse-data">
         <span class="sr-only">Toggle navigation</span>
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
@@ -20,9 +23,10 @@
       </button>
       <a class="navbar-brand" href="/">Climatic Adaption</a>
     </div>
-    <div class="navbar-collapse collapse">
+    <div class="navbar-collapse collapse" id="navbar-collapse-data">
       <ul class="nav navbar-nav">
         <li><a href="/">Home</a></li>
+        <li><a href="/admin">Admin</a></li>
       </ul>
     </div>
   </div>
