@@ -1,11 +1,9 @@
-{% extends 'base.html' %}
-{% block title %}
-Admin | Climatic Adaptation
-{% endblock %}
-{% block head %}
-{{ super() }}
-{% include 'angular.html' %}
+{{define "title" }}<title>Admin</title>{{end}}
 
+{{define "bodyContainer"}}
+
+<script src="/static/js/angular/1.3.14/angular.min.js"></script>
+<script src="/static/js/angular/1.3.14/angular-resource.min.js"></script>
 <script src="/static/js/services.js"></script>
 
 <script>
@@ -96,9 +94,6 @@ appMod.controller('mod1Controller', ['$scope', '$http', 'DeliverableRes', 'Deliv
 }]);
 
 </script>
-{% endblock %}
-
-{% block body %}
 <div ng-app="clapp">
 
   <div ng-controller="mod1Controller">
@@ -144,4 +139,4 @@ appMod.controller('mod1Controller', ['$scope', '$http', 'DeliverableRes', 'Deliv
   </div><!-- row -->
 </div> <!-- mod1Controller -->
 </div>
-{% endblock %}
+{{ end }}
