@@ -1,0 +1,79 @@
+{{define "title" }}<title>Climatic Adaptation</title>{{end}}
+
+{{define "bodyContainer" }}
+
+<script src="/static/js/script.js"></script>
+<script src="/static/js/Chart.min.js"></script>
+
+<div class="container">
+  <h3>Tier1</h3>
+  <canvas id="tier1" width="400" height="400"></canvas>
+  <hr>
+  <h3>Tier2</h3>
+  <canvas id="tier2" width="400" height="400"></canvas>
+  <hr>
+  <h3>Tier3</h3>
+  <canvas id="tier3" width="400" height="400"></canvas>
+  <hr>
+</div>
+<script>
+var data = [
+{
+value: 100,
+         color:"#F7464A",
+         highlight: "#FF5A5E",
+         label: "Orientation"
+},
+{
+value: 50,
+       color: "#46BFBD",
+       highlight: "#5AD3D1",
+       label: "Governance"
+},
+{
+value: 60,
+       color: "#FDB45C",
+       highlight: "#FFC870",
+       label: "Scope"
+},
+{
+value: 100,
+       color: "#949FB1",
+       highlight: "#A8B3C5",
+       label: "Risk Analysis"
+},
+{
+value: 20,
+       color: "#4D5360",
+       highlight: "#616774",
+       label: "Resilience Plan"
+},
+{
+value: 30,
+       color: "#4D53E0",
+       highlight: "#616774",
+       label: "Business Case"
+},
+{
+value: 40,
+       color: "#4DA360",
+       highlight: "#616774",
+       label: "Implementation"
+},
+{
+value: 50,
+       color: "#7D5360",
+       highlight: "#616774",
+       label: "Evolution"
+}
+
+];
+
+var tiers = ["tier1", "tier2", "tier3"]
+for(var i in tiers){
+  var ctx = document.getElementById(tiers[i]).getContext("2d");
+  var myNewChart = new Chart(ctx).PolarArea(data);
+}
+</script>
+
+{{end}}
