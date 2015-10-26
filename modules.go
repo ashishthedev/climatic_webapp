@@ -2,37 +2,44 @@ package climatic_webapp
 
 import (
 	"appengine"
-	"net/url"
+	"github.com/gorilla/mux"
+	"net/http"
 )
 
 func init() {
-	m := API{"/admin/api/module/{moduleName}", Resource(ModuleRes{})}
-	m.Register()
-	t := API{"/test1/", Resource(Test{})}
-	t.Register()
+	API{"/admin/api/module/{moduleName}", Resource(ModuleResource{})}.Register()
+	API{"/admin/api/module/{moduleName}/deliverable/{deliverableName}", Resource(DeliverableResource{})}.Register()
 }
 
-type ModuleRes struct {
+type ModuleResource struct {
 	PutNotSupported
 	DeleteNotSupported
 }
 
-type Test struct {
+func (m ModuleResource) Get(c appengine.Context, r *http.Request) (interface{}, error) {
+	vars := mux.Vars(r)
+	c.Infof("inside module resource get", "Got the resource", vars["moduleName"])
+	return "Found", nil
+}
+func (m ModuleResource) Post(c appengine.Context, r *http.Request) (interface{}, error) {
+	vars := mux.Vars(r)
+	c.Infof("inside module resource post", "Got the resource", vars["moduleName"])
+	return "Found", nil
+}
+
+type DeliverableResource struct {
 	PutNotSupported
-	PostNotSupported
 	DeleteNotSupported
 }
 
-func (t Test) Get(c appengine.Context, values url.Values) (interface{}, error) {
-	c.Infof("inside test resource get")
+func (m DeliverableResource) Get(c appengine.Context, r *http.Request) (interface{}, error) {
+	vars := mux.Vars(r)
+	c.Infof("inside DeliverableResource get", "Got the resource", vars["moduleName"])
 	return "Found", nil
 }
 
-func (m ModuleRes) Get(c appengine.Context, values url.Values) (interface{}, error) {
-	c.Infof("inside module resource get")
-	return "Found", nil
-}
-func (m ModuleRes) Post(c appengine.Context, values url.Values) (interface{}, error) {
-	c.Infof("inside module resource post")
+func (m DeliverableResource) Post(c appengine.Context, r *http.Request) (interface{}, error) {
+	vars := mux.Vars(r)
+	c.Infof("inside deliverable resource post", "Got the resource", vars["moduleName"], vars["deliverableName"])
 	return "Found", nil
 }

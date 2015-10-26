@@ -3,7 +3,6 @@ package climatic_webapp
 import (
 	"fmt"
 	"net/http"
-	"net/url"
 
 	"appengine"
 )
@@ -16,10 +15,10 @@ const (
 )
 
 type Resource interface {
-	Get(c appengine.Context, values url.Values) (interface{}, error)
-	Post(c appengine.Context, values url.Values) (interface{}, error)
-	Put(c appengine.Context, values url.Values) (interface{}, error)
-	Delete(c appengine.Context, values url.Values) (interface{}, error)
+	Get(c appengine.Context, r *http.Request) (interface{}, error)
+	Post(c appengine.Context, r *http.Request) (interface{}, error)
+	Put(c appengine.Context, r *http.Request) (interface{}, error)
+	Delete(c appengine.Context, r *http.Request) (interface{}, error)
 }
 
 type ExampleOfGetResource struct {
@@ -35,16 +34,16 @@ type (
 	DeleteNotSupported struct{}
 )
 
-func (GetNotSupported) Get(c appengine.Context, values url.Values) (interface{}, error) {
+func (GetNotSupported) Get(c appengine.Context, r *http.Request) (interface{}, error) {
 	return nil, fmt.Errorf("GET not implemented")
 }
-func (PostNotSupported) Post(c appengine.Context, values url.Values) (interface{}, error) {
+func (PostNotSupported) Post(c appengine.Context, r *http.Request) (interface{}, error) {
 	return nil, fmt.Errorf("POST not implemented")
 }
-func (PutNotSupported) Put(c appengine.Context, values url.Values) (interface{}, error) {
+func (PutNotSupported) Put(c appengine.Context, r *http.Request) (interface{}, error) {
 	return nil, fmt.Errorf("PUT not implemented")
 }
-func (DeleteNotSupported) Delete(c appengine.Context, values url.Values) (interface{}, error) {
+func (DeleteNotSupported) Delete(c appengine.Context, r *http.Request) (interface{}, error) {
 	return nil, fmt.Errorf("DELETE not implemented")
 }
 
@@ -70,18 +69,18 @@ func apiHandler(api API) gaeHandler {
 		var data interface{}
 		var err error
 
-		r.ParseForm()
-		values := r.Form
+		// r.ParseForm()
+		// values := r.Form
 
 		switch r.Method {
 		case GET:
-			data, err = api.resource.Get(c, values)
+			data, err = api.resource.Get(c, r)
 		case POST:
-			data, err = api.resource.Post(c, values)
+			data, err = api.resource.Post(c, r)
 		case PUT:
-			data, err = api.resource.Put(c, values)
+			data, err = api.resource.Put(c, r)
 		case DELETE:
-			data, err = api.resource.Delete(c, values)
+			data, err = api.resource.Delete(c, r)
 		default:
 			return nil, fmt.Errorf(r.Method + " not implemented")
 		}
