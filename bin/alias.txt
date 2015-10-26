@@ -91,7 +91,7 @@ rollbackprojlive = pushd %XDATDOCSDIR%\app && appcfg.py rollback . --email="ashi
 rollbackprojdev = pushd %XDATDOCSDIR%\app && appcfg.py rollback .  --email="ashishthedev@gmail.com" --version="dev" --noauth_local_webserver --oauth2 $*
 
 
-spinup = pushd %XDATDOCSDIR% && spinup_local_gae_server.bat && popd
+spinup = pushd %XDATDOCSDIR% && spinup_local_gae_server.bat && start SMTPDebuggingServer.py && popd
 
 ;= :end
 ;= rem ******************************************************************

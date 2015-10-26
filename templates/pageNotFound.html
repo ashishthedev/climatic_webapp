@@ -1,13 +1,6 @@
-{% extends 'base.html' %}
-{% block title %}
-Page Not Found
-{% endblock %}
-{% block head %}
-{% endblock %}
+{{define "title" }}<title>Page Not Found</title>{{end}}
 
-{% block body %}
+{{define "bodyContainer" }}
 
-<p>
-Sorry! This page does not exist.
-</p>
-{% endblock %}
+<p>Sorry! This page was not found </p>
+{{end}}

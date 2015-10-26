@@ -2,6 +2,7 @@ package climatic_webapp
 
 import (
 	"encoding/json"
+	"github.com/gorilla/mux"
 	"html/template"
 	"net/http"
 
@@ -25,7 +26,7 @@ func (h gaeHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 type urlPack struct {
 	urlPath      string
-	handler      func(w http.ResponseWriter, r *http.Request)
+	handler      func(http.ResponseWriter, *http.Request)
 	templatePath string
 	data         interface{}
 }
@@ -35,27 +36,30 @@ type TEMPLATE_AND_DATA struct {
 	data interface{}
 }
 
+var BASE_TEMPLATE = "templates/base.html"
 var PRE_BUILT_TEMPLATES_WITH_DATA = make(map[string]TEMPLATE_AND_DATA)
-var PAGE_NOT_FOUND_TEMPLATE = template.Must(template.ParseFiles("templates/pageNotFound.html"))
+var PAGE_NOT_FOUND_TEMPLATE = template.Must(template.ParseFiles("templates/pageNotFound.html", BASE_TEMPLATE))
+
+var router = new(mux.Router)
 
 func initStaticHTMLUrlMaps() {
-	BASE_TEMPLATE := "templates/base.html"
 	urlPacks := []urlPack{
-		{"/", generalPageHandler, "templates/home.html", nil},
-		{"/admin", generalPageHandler, "templates/admin.html", nil},
+		{"/", pageHandler, "templates/home.html", nil},
+		{"/admin", pageHandler, "templates/admin.html", nil},
 	}
 
 	for _, x := range urlPacks {
 		PRE_BUILT_TEMPLATES_WITH_DATA[x.urlPath] = TEMPLATE_AND_DATA{template.Must(template.ParseFiles(x.templatePath, BASE_TEMPLATE)), x.data}
-		http.HandleFunc(x.urlPath, x.handler)
+		router.HandleFunc(x.urlPath, x.handler)
 	}
 }
 
 func init() {
 	initStaticHTMLUrlMaps()
+	http.Handle("/", router)
 }
 
-func generalPageHandler(w http.ResponseWriter, r *http.Request) {
+func pageHandler(w http.ResponseWriter, r *http.Request) {
 	t := PRE_BUILT_TEMPLATES_WITH_DATA[r.URL.Path].t
 	data := PRE_BUILT_TEMPLATES_WITH_DATA[r.URL.Path].data
 	if t == nil {
@@ -64,8 +68,9 @@ func generalPageHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := t.ExecuteTemplate(w, "base", data); err != nil {
+		c := appengine.NewContext(r)
+		c.Errorf("%v", err.Error())
+		CLWAReportErrorThroughMail(r, "Error happended while serving"+r.URL.Path, err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
 	}
-	return
 }
