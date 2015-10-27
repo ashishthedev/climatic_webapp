@@ -79,7 +79,7 @@ s = "c:\\Program Files\\sublime text 2\\sublime_text.exe" $*
 ;= rem Whichever project you are in the following shortcuts gonna work.
 gcloudlogin = gcloud auth login --no-launch-browser
 gproj = pushd %XDATDOCSDIR%\app
-goliveproj = pushd %XDATDOCSDIR%\app && goapp test && appcfg.py update . --email="ashishthedev@gmail.com" --version="live" --noauth_local_webserver --oauth2 $*
+goliveproj = pushd %XDATDOCSDIR% && goapp test && appcfg.py update . --email="ashishthedev@gmail.com" --version="live" --noauth_local_webserver --oauth2 $*
 
 godevproj = pushd %XDATDOCSDIR%\app && goapp test && appcfg.py update . --email="ashishthedev@gmail.com" --version="dev" --noauth_local_webserver --oauth2 $*
 godevprojnotest = pushd %XDATDOCSDIR%\app && appcfg.py update . --email="ashishthedev@gmail.com" --version="dev" --noauth_local_webserver --oauth2 $*

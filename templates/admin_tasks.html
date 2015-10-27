@@ -52,7 +52,6 @@ appMod.controller('adminController', ['$scope', 'DELIVERABLES', 'UploadUrl', fun
     var p = DELIVERABLES.get().$promise;
     p.then(function(deliverables){
       $scope.deliverables = deliverables;
-      $scope.statusNote = "Initialized...";
       }, function(error){
       $scope.statusNote = error.status + ": " + error.data;
       });
@@ -67,13 +66,13 @@ appMod.controller('adminController', ['$scope', 'DELIVERABLES', 'UploadUrl', fun
     $scope.DeleteTask = function(tier, task){
     var newTasks = [];
     for(i=0; i<tier.Tasks.length; i++){
-      var x = tier.Tasks[i];
-      if (x.Name != task.Name){
-        newTasks.push(x);
-      }
-      else{
-        //TODO: Delete the associated BlobKey file. task.BlobKey
-      }
+    var x = tier.Tasks[i];
+    if (x.Name != task.Name){
+      newTasks.push(x);
+    }
+    else{
+      //TODO: Delete the associated BlobKey file. task.BlobKey
+    }
     }
     tier.Tasks = newTasks;
 
@@ -93,8 +92,10 @@ appMod.controller('adminController', ['$scope', 'DELIVERABLES', 'UploadUrl', fun
 
   <div ng-controller="adminController">
     <div id="statusNote" ng-bind="statusNote"></div>
-    <div ng-repeat="m in deliverables.Modules" >
-      <legend><span ng-bind="m.Name"></span></legend>
+    <div class="clearfix" ng-repeat="m in deliverables.Modules" >
+      <br>
+      <br>
+      <legend class="clearfix"><span ng-bind="m.Name"></span></legend>
 
       <ul ng-repeat="tier in m.Tiers" class="list-unstyled">
         <h5><span class="text-muted small" ng-bind="tier.Name"></span></h5>

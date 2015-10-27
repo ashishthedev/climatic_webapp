@@ -1,5 +1,5 @@
-application: climaticwebapp 
-version: 1
+application: climaticwebapp
+version: live
 runtime: go
 api_version: go1
 
