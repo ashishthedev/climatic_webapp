@@ -8,9 +8,11 @@
 {{end}}
 
 {{define "bodyContainer"}}
-<ul class="nav nav-pills nav-stacked nav-justified text-center">
-  <li><h5><a href="/admin/tasks">Tasks</a></h5></li><hr>
-  <li><h5><a href="/admin/tiers">Tiers</a></h5></li><hr>
-  <li><h5><a href="/admin/modules">Modules</a></h5></li><hr>
-</ul>
+<div class="col-xs-12 col-sm-6 col-sm-offset-3">
+  <ul class="nav nav-pills nav-stacked nav-justified text-center">
+    <li><a class="btn-lg" href="/admin/modules">Modules</a></li><br>
+    <li><a class="btn-lg" href="/admin/tasks">Tasks</a></li><br>
+    <li><a class="btn-lg" href="/admin/tiers">Tiers</a></li><br>
+  </ul>
+</div>
 {{ end }}

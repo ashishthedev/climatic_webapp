@@ -1,4 +1,4 @@
-{{define "title" }}<title>Admin</title>{{end}}
+{{define "title" }}<title>Tiers | Admin</title>{{end}}
 {{define "pageSpecificScripts" }}
 
 <script src="/static/js/angular/1.3.14/angular.min.js"></script>
@@ -12,47 +12,14 @@ appMod.config(function($interpolateProvider) {
     $interpolateProvider.startSymbol('||');
     $interpolateProvider.endSymbol('||');
     });
-appMod.directive("fileread", [function () {
-    return {
-scope: {
-fileread: "="
-},
-link: function (scope, element, attributes) {
-element.bind("change", function (changeEvent) {
-  var reader = new FileReader();
-  reader.onload = function (loadEvent) {
-  scope.$apply(function () {
-    scope.fileread = loadEvent.target.result;
-    });
-  }
-  reader.readAsDataURL(changeEvent.target.files[0]);
-  });
-}
-}
-}]);
 
-appMod.service('fileUpload', ['$http', function ($http) {
-    this.uploadFileToUrl = function(file, uploadUrl){
-    var fd = new FormData();
-    fd.append('file', file);
-    $http.post(uploadUrl, fd, {
-transformRequest: angular.identity,
-headers: {'Content-Type': undefined}//TODO: Checkout if content-type can be left alone?
-})
-    .success(function(){
-      })
-    .error(function(){
-      });
-    }
-    }]);
 
-appMod.controller('adminController', ['$scope', 'DELIVERABLES', 'UploadUrl', function($scope, DELIVERABLES, UploadUrl) {
+appMod.controller('adminController', ['$scope', 'DELIVERABLES', function($scope, DELIVERABLES) {
 
     FetchDeliverables = function(){
     var p = DELIVERABLES.get().$promise;
     p.then(function(deliverables){
       $scope.deliverables = deliverables;
-      $scope.statusNote = "Initialized...";
       }, function(error){
       $scope.statusNote = error.status + ": " + error.data;
       });
@@ -62,27 +29,49 @@ appMod.controller('adminController', ['$scope', 'DELIVERABLES', 'UploadUrl', fun
 
     function init(){
     FetchDeliverables();
+    $scope.deletedTiers = [];
+    $scope.dirty = false;
     }
 
-    $scope.DeleteTask = function(tier, task){
-    var newTasks = [];
-    for(i=0; i<tier.Tasks.length; i++){
-      var x = tier.Tasks[i];
-      if (x.Name != task.Name){
-        newTasks.push(x);
-      }
-      else{
-        //TODO: Delete the associated BlobKey file. task.BlobKey
-      }
+    $scope.DeleteTier = function(tierName){
+    //Loop over all the modules
+    // Delete the tiers and save the files for future deletion
+      angular.forEach($scope.deliverables.Modules, function(module, _){
+          var newTiers = [];
+          angular.forEach(module.Tiers, function(tier, _){
+            if (tier.Name != tierName){
+            this.push(tier);
+            }else{
+            $scope.deletedTiers.push(tier); //TODO: Delete all the files when finally saving the changes.
+            }
+            }, newTiers);
+          module.Tiers = newTiers;
+          });
+      $scope.dirty = true;
     }
-    tier.Tasks = newTasks;
 
-    }
-    $scope.addOrphanTask = function(tier, orphanTask){
-      tier.Tasks.push(angular.copy(orphanTask));
+    $scope.addOrphanTier = function(tier){
+      angular.forEach($scope.deliverables.Modules, function(module, i){
+          module.Tiers.push(angular.copy(tier));
+          } );
+      $scope.dirty = true;
       return;
 
     }
+
+
+    $scope.SaveChanges = function(){
+      var p = DELIVERABLES.save($scope.deliverables).$promise;
+      p.then(function(){
+          $scope.statusNote = "Changes saved";
+          $scope.dirty = false;
+          }, function(error){
+          $scope.statusNote = error.status + ": " + error.data;
+          });
+      return p;
+
+    }
+
 }]);
 
 </script>
@@ -93,48 +82,40 @@ appMod.controller('adminController', ['$scope', 'DELIVERABLES', 'UploadUrl', fun
 
   <div ng-controller="adminController">
     <div id="statusNote" ng-bind="statusNote"></div>
-    <div ng-repeat="m in deliverables.Modules" >
-      <legend><span ng-bind="m.Name"></span></legend>
+    <div ng-if="deliverables.Modules.length == 0">
+      At least one <a href="/admin/modules">module</a> should be defined before any tier can be added.
+    </div>
+    <div ng-if="deliverables.Modules.length != 0">
 
-      <ul ng-repeat="tier in m.Tiers" class="list-unstyled">
-        <h5><span class="text-muted small" ng-bind="tier.Name"></span></h5>
-        <ul ng-repeat="t in tier.Tasks" class="list-unstyled">
-
-          <div class="form-group">
-            <label class="col-xs-2 col-sm-2 control-label"><span ng-bind="t.Name"></span></label>
-            <div class="col-xs-10 col-sm-10">
-              <span class="col-xs-6 col-sm-9">
-                <div class="input-group">
-                  <span class="input-group-btn">
-                    <span class="btn btn-default btn-primary" onclick="$(this).parent().find('input[type=file]').click();">Browse</span>
-                    <input name="uploaded_file" onchange="$(this).parent().parent().find('.form-control').html($(this).val().split(/[\\|/]/).pop());" style="display: none;" type="file">
-                  </span>
-                  <span class="form-control"></span>
-                </div>
-              </span>
-
-              <span class="col-xs-4 col-sm-2"><button class="btn btn-default">Remove</button></span>
-
-              <span class="pull-right col-sm-1 col-xs-1">
-                <a ng-click="DeleteTask(tier, t)">
-                  <span class="glyphicon glyphicon-remove"></span>
-                </a>
-              </span>
-
-            </div>
+      <div class="row">
+        <ul ng-repeat="tier in deliverables.Modules[0].Tiers" class="list-unstyled">
+          <div class="col-xs-10">
+            <h5><span class="text-muted small" ng-bind="tier.Name"></span></h5>
+          </div>
+          <div class="col-xs-2">
+            <span class="pull-left">
+              <a ng-click="DeleteTier(tier.Name)"> <span class="glyphicon glyphicon-remove"></span> </a>
+            </span>
           </div>
 
         </ul>
 
+        <form>
+          <div class="col-sm-6 col-xs-12">
+            <input class="form-control" placeholder="New Tier..." ng-model="orphanTier.Name">
+          </div>
+          <div ng-show="orphanTier.Name" class="col-sm-6 col-xs-12">
+            <button class="btn col-xs-12 btn-default" ng-click="addOrphanTier(orphanTier); orphanTier={}">Add Tier</button>
+          </div>
+        </form>
+      </div>
 
-        <div class="col-sm-6 col-xs-12">
-          <input class="form-control" placeholder="New Task..." ng-model="orphanTask.Name">
-        </div>
-        <div ng-show="orphanTask.Name" class="col-sm-6 col-xs-12">
-          <button class="btn col-xs-12 btn-default" ng-click="addOrphanTask(tier, orphanTask); orphanTask={}">Add Task</button>
-        </div>
-      </ul>
-    </div>
+      <div ng-show="dirty" class="row">
+        <br>
+        <button class="btn btn-warning center-block" ng-click="SaveChanges()">Save Changes</button>
+      </div>
+
+    </div> <!-- if deliverables.Modules.length != 0 -->
   </div> <!-- adminController -->
 
 </div>
