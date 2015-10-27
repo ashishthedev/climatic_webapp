@@ -1,9 +1,11 @@
 {{define "title" }}<title>Climatic Adaptation</title>{{end}}
+{{define "pageSpecificScripts" }}
+<script src="/static/js/script.js"></script>
+<script src="/static/js/Chart.min.js"></script>
+{{end}}
 
 {{define "bodyContainer" }}
 
-<script src="/static/js/script.js"></script>
-<script src="/static/js/Chart.min.js"></script>
 
 <div class="container">
   <h3>Tier1</h3>
@@ -69,7 +71,8 @@ value: 50,
 
 ];
 
-var tiers = ["tier1", "tier2", "tier3"]
+var tiers = ["tier1", "tier2", "tier3"];
+
 for(var i in tiers){
   var ctx = document.getElementById(tiers[i]).getContext("2d");
   var myNewChart = new Chart(ctx).PolarArea(data);

@@ -85,10 +85,7 @@ func apiHandler(api API) gaeHandler {
 			return nil, fmt.Errorf(r.Method + " not implemented")
 		}
 
-		if err = WriteJson(w, data); err != nil {
-			return nil, err
-		}
-		return nil, nil
+		return data, err
 	}
 	return gaeHandler(h)
 }

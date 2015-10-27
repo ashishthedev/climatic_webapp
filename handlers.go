@@ -46,6 +46,9 @@ func initStaticHTMLUrlMaps() {
 	urlPacks := []urlPack{
 		{"/", pageHandler, "templates/home.html", nil},
 		{"/admin", pageHandler, "templates/admin.html", nil},
+		{"/admin/tasks", pageHandler, "templates/admin_tasks.html", nil},
+		{"/admin/modules", pageHandler, "templates/admin_modules.html", nil},
+		{"/admin/tiers", pageHandler, "templates/admin_tiers.html", nil},
 	}
 
 	for _, x := range urlPacks {

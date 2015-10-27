@@ -4,9 +4,10 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 <script src="/static/js/bootstrap.min.js"></script>
 <link rel="stylesheet" href="/static/css/bootstrap.min.css">
-<link rel="stylesheet" href="/static/css/theme.min.css">
+<link rel="stylesheet" href="/static/css/paper.css">
 <link rel="stylesheet" href="/static/css/style.css">
 {{ template "title" . }}
+{{ template "pageSpecificScripts" . }}
 </head>
 
 <body>
@@ -31,9 +32,9 @@
   </div>
 </div>
 
-<div class="container">
+<div class="container-fluid">
   {{ template "bodyContainer" .}}
-
 </div>
+
 </body>
 </html>{{end}}
