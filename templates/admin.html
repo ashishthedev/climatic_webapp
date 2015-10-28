@@ -4,15 +4,18 @@
 <script src="/static/js/angular/1.3.14/angular.min.js"></script>
 <script src="/static/js/angular/1.3.14/angular-resource.min.js"></script>
 <script src="/static/js/services.js"></script>
+<link rel="stylesheet" href="/static/css/sidebar.css">
 
 {{end}}
 
 {{define "bodyContainer"}}
-<div class="col-xs-12 col-sm-6 col-sm-offset-3">
-  <ul class="nav nav-pills nav-stacked nav-justified text-center">
-    <li><a class="btn-lg" href="/admin/modules">Modules</a></li><br>
-    <li><a class="btn-lg" href="/admin/tiers">Tiers</a></li><br>
-    <li><a class="btn-lg" href="/admin/tasks">Tasks</a></li><br>
+<aside class="col-sm-3 col-md-2">
+  <ul class="nav-list">
+    <li><a href="/admin/modules">Modules</a></li>
+    <li><a href="/admin/tiers">Tiers</a></li>
+    <li><a href="/admin/tasks">Tasks</a></li>
   </ul>
-</div>
+</aside>
+{{template "adminBodyContainer"}}
+
 {{ end }}

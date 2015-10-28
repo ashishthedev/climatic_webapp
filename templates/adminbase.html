@@ -1,0 +1,14 @@
+{{define "bodyContainer"}}
+<link rel="stylesheet" href="/static/css/sidebar.css">
+<div class="col-xs-12 col-sm-3 col-md-2">
+  <ul class="nav-list">
+    <li><a href="/admin/tasks">Tasks</a></li>
+    <li><a href="/admin/modules">Modules</a></li>
+    <li><a href="/admin/tiers">Tiers</a></li>
+  </ul>
+</div>
+<div class="col-xs-12 col-sm-9 col-md-10">
+  {{template "adminBodyContainer"}}
+</div>
+
+{{ end }}

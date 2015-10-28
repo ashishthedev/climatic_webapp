@@ -87,14 +87,12 @@ appMod.controller('adminController', ['$scope', 'DELIVERABLES', 'UploadUrl', fun
 </script>
 {{end}}
 
-{{define "bodyContainer"}}
+{{define "adminBodyContainer"}}
 <div ng-app="clapp">
 
   <div ng-controller="adminController">
     <div id="statusNote" ng-bind="statusNote"></div>
-    <div class="clearfix" ng-repeat="m in deliverables.Modules" >
-      <br>
-      <br>
+    <div class="clearfix mb-40" ng-repeat="m in deliverables.Modules" >
       <legend class="clearfix"><span ng-bind="m.Name"></span></legend>
 
       <ul ng-repeat="tier in m.Tiers" class="list-unstyled">
@@ -114,9 +112,9 @@ appMod.controller('adminController', ['$scope', 'DELIVERABLES', 'UploadUrl', fun
                 </div>
               </span>
 
-              <span class="col-xs-4 col-sm-2"><button class="btn btn-default">Remove</button></span>
+              <span class="clearfix col-xs-4 col-sm-2"><button class="btn btn-default">Remove</button></span>
 
-              <span class="pull-right col-sm-1 col-xs-1">
+              <span class="clearfix pull-right col-sm-1 col-xs-1">
                 <a ng-click="DeleteTask(tier, t)">
                   <span class="glyphicon glyphicon-remove"></span>
                 </a>

@@ -1,12 +1,21 @@
 #statusNote{
-	color: turquoise;
-	text-align: center;
+  color: turquoise;
+  text-align: center;
 }
 
-.nav-sidebar{
-  background-color: #f8f8f8;
-
+.mb-20{
+  margin-bottom: 20px;
 }
+.mb-30{
+  margin-bottom: 30px;
+}
+.mb-40{
+  margin-bottom: 40px;
+}
+
+
+
+
 .navbar-inverse {
   background-color: #18bc9c;
   border-color: transparent;

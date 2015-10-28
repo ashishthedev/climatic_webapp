@@ -25,10 +25,10 @@ func (h gaeHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 type urlPack struct {
-	urlPath      string
-	handler      func(http.ResponseWriter, *http.Request)
-	templatePath string
-	data         interface{}
+	urlPath            string
+	handler            http.HandlerFunc
+	data               interface{}
+	dependentTemplates []string
 }
 
 type TEMPLATE_AND_DATA struct {
@@ -37,6 +37,7 @@ type TEMPLATE_AND_DATA struct {
 }
 
 var BASE_TEMPLATE = "templates/base.html"
+var ADMIN_BASE = "templates/adminbase.html"
 var PRE_BUILT_TEMPLATES_WITH_DATA = make(map[string]TEMPLATE_AND_DATA)
 var PAGE_NOT_FOUND_TEMPLATE = template.Must(template.ParseFiles("templates/pageNotFound.html", BASE_TEMPLATE))
 
@@ -44,15 +45,15 @@ var router = new(mux.Router)
 
 func initStaticHTMLUrlMaps() {
 	urlPacks := []urlPack{
-		{"/", pageHandler, "templates/home.html", nil},
-		{"/admin", pageHandler, "templates/admin.html", nil},
-		{"/admin/tasks", pageHandler, "templates/admin_tasks.html", nil},
-		{"/admin/modules", pageHandler, "templates/admin_modules.html", nil},
-		{"/admin/tiers", pageHandler, "templates/admin_tiers.html", nil},
+		{"/", pageHandler, nil, []string{"templates/home.html", BASE_TEMPLATE}},
+		{"/admin", pageHandler, nil, []string{"templates/admin_tasks.html", BASE_TEMPLATE, ADMIN_BASE}},
+		{"/admin/tasks", pageHandler, nil, []string{"templates/admin_tasks.html", BASE_TEMPLATE, ADMIN_BASE}},
+		{"/admin/modules", pageHandler, nil, []string{"templates/admin_modules.html", BASE_TEMPLATE, ADMIN_BASE}},
+		{"/admin/tiers", pageHandler, nil, []string{"templates/admin_tiers.html", BASE_TEMPLATE, ADMIN_BASE}},
 	}
 
 	for _, x := range urlPacks {
-		PRE_BUILT_TEMPLATES_WITH_DATA[x.urlPath] = TEMPLATE_AND_DATA{template.Must(template.ParseFiles(x.templatePath, BASE_TEMPLATE)), x.data}
+		PRE_BUILT_TEMPLATES_WITH_DATA[x.urlPath] = TEMPLATE_AND_DATA{template.Must(template.ParseFiles(x.dependentTemplates...)), x.data}
 		router.HandleFunc(x.urlPath, x.handler)
 	}
 }
