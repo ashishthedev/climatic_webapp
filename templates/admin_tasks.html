@@ -100,9 +100,9 @@ appMod.controller('adminController', ['$scope', 'DELIVERABLES', 'UploadUrl', fun
         <ul ng-repeat="t in tier.Tasks" class="list-unstyled">
 
           <div class=" clearfix form-group">
-            <label class="col-xs-2 col-sm-2 control-label"><span ng-bind="t.Name"></span></label>
-            <div class="col-xs-10 col-sm-10">
-              <span class="col-xs-6 col-sm-9">
+            <label class="col-xs-12 col-sm-2 control-label"><span ng-bind="t.Name"></span></label>
+            <div class="col-xs-12 col-sm-10">
+              <span class="col-xs-12 col-sm-6">
                 <div class="input-group">
                   <span class="input-group-btn">
                     <span class="btn btn-default btn-primary" onclick="$(this).parent().find('input[type=file]').click();">Browse</span>
@@ -112,9 +112,9 @@ appMod.controller('adminController', ['$scope', 'DELIVERABLES', 'UploadUrl', fun
                 </div>
               </span>
 
-              <span class="clearfix col-xs-4 col-sm-2"><button class="btn btn-default">Remove</button></span>
+              <span class="clearfix col-xs-6 col-sm-3"><button class="btn btn-default">Remove</button></span>
 
-              <span class="clearfix pull-right col-sm-1 col-xs-1">
+              <span class="clearfix pull-right col-sm-3 col-xs-6">
                 <a ng-click="DeleteTask(tier, t)">
                   <span class="glyphicon glyphicon-remove"></span>
                 </a>
