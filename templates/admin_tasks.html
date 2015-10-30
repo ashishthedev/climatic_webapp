@@ -117,10 +117,10 @@ appMod.controller('adminController', ['$scope', 'DELIVERABLES', 'UploadUrl', fun
   </div>
 
   <div ng-show="!working">
-    <div ng-if="deliverables.Modules.length == 0">
+    <div ng-if="deliverables.Modules==null">
       At least one <a href="/admin/modules">Module</a> and one <a href="/admin/tiers">Tier</a> should be defined before any task can be added.
     </div>
-    <div ng-if="deliverables.Modules.length != 0">
+    <div ng-if="deliverables.Modules != null">
       <div ng-if="deliverables.Modules[0].Tiers==null">
         At least one <a href="/admin/tiers">Tier</a> should be defined before any task can be added.
       </div>
