@@ -1,12 +1,12 @@
 package climatic_webapp
 
 import (
-	"time"
-
 	"appengine"
+	"encoding/json"
 )
 
 type Deliverables struct {
+	Id      int64 `datastore:",noindex"`
 	Modules []Module
 	OrgName string
 }
@@ -23,10 +23,22 @@ type Tier struct {
 
 type Task struct {
 	Name    string
-	Date    time.Time
 	BlobKey appengine.BlobKey
 }
 
 type UploadUrl struct {
 	url string
+}
+
+type DeliverablesAsString struct {
+	S string
+}
+
+func (d *Deliverables) FromString(c appengine.Context, s string) error {
+	return json.Unmarshal([]byte(s), d)
+}
+
+func (d *Deliverables) ToString(c appengine.Context) (string, error) {
+	b, err := json.Marshal(d)
+	return string(b), err
 }

@@ -20,22 +20,31 @@ appMod.controller('adminController', ['$scope', 'DELIVERABLES', function($scope,
     var p = DELIVERABLES.get().$promise;
     p.then(function(deliverables){
       $scope.deliverables = deliverables;
+      StopSpinner();
       }, function(error){
       $scope.statusNote = error.status + ": " + error.data;
+      StopSpinner();
       });
     return p;
+    }
+    StopSpinner = function(){
+    $scope.working = false;
+    }
+    StartSpinner = function(){
+    $scope.working = true;
     }
     init();
 
     function init(){
-    FetchDeliverables();
-    $scope.deletedModules = [];
-    $scope.dirty = false;
+      StartSpinner();
+      FetchDeliverables();
+      $scope.deletedModules = [];
+      $scope.dirty = false;
     }
 
     $scope.DeleteModule = function(moduleName){
-    //Loop over all the deliverables
-    // Delete the modules and save the files for future deletion
+      //Loop over all the deliverables
+      // Delete the modules and save the files for future deletion
       var newModules = [];
       angular.forEach($scope.deliverables.Modules, function(m, _){
           if (m.Name != moduleName){
@@ -49,6 +58,7 @@ appMod.controller('adminController', ['$scope', 'DELIVERABLES', function($scope,
     }
 
     $scope.addOrphanModule = function(m){
+      $scope.deliverables.Modules = $scope.deliverables.Modules || [];
       $scope.deliverables.Modules.push(angular.copy(m));
       $scope.dirty = true;
       return;
@@ -74,11 +84,14 @@ appMod.controller('adminController', ['$scope', 'DELIVERABLES', function($scope,
 {{end}}
 
 {{define "adminBodyContainer"}}
-<div ng-app="clapp">
+<div ng-app="clapp" ng-controller="adminController">
+  <div id="statusNote" ng-bind="statusNote"></div>
 
-  <div ng-controller="adminController">
-    <div id="statusNote" ng-bind="statusNote"></div>
+  <div ng-show="working">
+    <img class="center-block" src="/static/img/working.gif" />
+  </div>
 
+  <div ng-show="!working">
     <div class="row">
       <ul ng-repeat="m in deliverables.Modules" class="list-unstyled">
         <div class="col-xs-10">
@@ -107,7 +120,6 @@ appMod.controller('adminController', ['$scope', 'DELIVERABLES', function($scope,
       <button class="btn btn-warning center-block" ng-click="SaveChanges()">Save Changes</button>
     </div>
 
-  </div> <!-- adminController -->
-
+  </div> <!-- working -->
 </div>
 {{ end }}

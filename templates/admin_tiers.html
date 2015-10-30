@@ -20,22 +20,33 @@ appMod.controller('adminController', ['$scope', 'DELIVERABLES', function($scope,
     var p = DELIVERABLES.get().$promise;
     p.then(function(deliverables){
       $scope.deliverables = deliverables;
+      $scope.deliverables.Modules = $scope.deliverables.Modules || [];
+      StopSpinner();
       }, function(error){
       $scope.statusNote = error.status + ": " + error.data;
+      StopSpinner();
       });
     return p;
+    }
+    StopSpinner = function(){
+    $scope.working = false;
+    }
+    StartSpinner = function(){
+    $scope.working = true;
     }
     init();
 
     function init(){
-    FetchDeliverables();
-    $scope.deletedTiers = [];
-    $scope.dirty = false;
+      StartSpinner();
+      FetchDeliverables();
+      $scope.deletedTiers = [];
+      $scope.dirty = false;
+
     }
 
     $scope.DeleteTier = function(tierName){
-    //Loop over all the modules
-    // Delete the tiers and save the files for future deletion
+      //Loop over all the modules
+      // Delete the tiers and save the files for future deletion
       angular.forEach($scope.deliverables.Modules, function(module, _){
           var newTiers = [];
           angular.forEach(module.Tiers, function(tier, _){
@@ -51,7 +62,9 @@ appMod.controller('adminController', ['$scope', 'DELIVERABLES', function($scope,
     }
 
     $scope.addOrphanTier = function(tier){
+      $scope.deliverables.Modules = $scope.deliverables.Modules || [];
       angular.forEach($scope.deliverables.Modules, function(module, i){
+          module.Tiers = module.Tiers || [];
           module.Tiers.push(angular.copy(tier));
           } );
       $scope.dirty = true;
@@ -78,9 +91,13 @@ appMod.controller('adminController', ['$scope', 'DELIVERABLES', function($scope,
 {{end}}
 
 {{define "adminBodyContainer"}}
-<div ng-app="clapp">
+<div ng-app="clapp" ng-controller="adminController">
 
-  <div ng-controller="adminController">
+  <div ng-show="working">
+    <img class="center-block" src="/static/img/working.gif" />
+  </div>
+
+  <div ng-show="!working">
     <div id="statusNote" ng-bind="statusNote"></div>
     <div ng-if="deliverables.Modules.length == 0">
       At least one <a href="/admin/modules">module</a> should be defined before any tier can be added.
@@ -116,7 +133,7 @@ appMod.controller('adminController', ['$scope', 'DELIVERABLES', function($scope,
       </div>
 
     </div> <!-- if deliverables.Modules.length != 0 -->
-  </div> <!-- adminController -->
+  </div> <!-- working -->
 
 </div>
 {{ end }}

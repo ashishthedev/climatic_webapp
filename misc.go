@@ -150,19 +150,19 @@ func fromJson(v []byte, vv interface{}) error {
 	return json.Unmarshal(v, vv)
 }
 
-func JsonToStruct(data *string, v interface{}, r *http.Request) error {
+func JsonToStruct(c appengine.Context, data *string, v interface{}) error {
 	b := bytes.NewBuffer([]byte(*data))
 	if err := json.NewDecoder(b).Decode(v); err != nil {
-		myDebug(r, "Error in JsonToStruct():"+err.Error())
+		c.Errorf("Error in JsonToStruct():" + err.Error())
 		return err
 	}
 	return nil
 }
 
-func StructToJson(v interface{}, r *http.Request) (*string, error) {
+func StructToJson(c appengine.Context, v interface{}) (*string, error) {
 	var b bytes.Buffer
 	if err := json.NewEncoder(&b).Encode(v); err != nil {
-		myDebug(r, "Error in StructToJson():"+err.Error())
+		c.Errorf("Error in StructToJson():" + err.Error())
 		return nil, err
 	}
 
@@ -210,4 +210,19 @@ func logErr(r *http.Request, err error, fnName string) error {
 	s := "Error returned from " + fnName + "() :\n" + err.Error()
 	appengine.NewContext(r).Errorf("\n>>>>|" + s + "|<<<<")
 	return err
+}
+
+func PrintInBox(c appengine.Context, msgs ...interface{}) {
+	var s string
+	for i := range msgs {
+		b, err := json.MarshalIndent(msgs[i], "", "  ")
+		if err != nil {
+			fmt.Println("error:", err)
+		}
+		s += string(b)
+		s += "\n__\n"
+	}
+	bigline := "\n__________________________________________________________________\n"
+
+	c.Infof("\n", bigline, s, bigline)
 }
