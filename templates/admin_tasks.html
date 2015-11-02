@@ -33,7 +33,7 @@ element.bind('change', function(){
 }
 }]);
 
-appMod.controller('adminController', ['$scope', '$http', '$window', 'DELIVERABLES', 'UPLOADURL', function($scope, $http, $window, DELIVERABLES, UPLOADURL) {
+appMod.controller('adminController', ['$scope', '$http', '$window', 'DELIVERABLES', 'UPLOADURL', 'REMOVETASKFILE', function($scope, $http, $window, DELIVERABLES, UPLOADURL, REMOVETASKFILE) {
 
     function FetchDeliverables(){
     var p = DELIVERABLES.get().$promise;
@@ -55,6 +55,7 @@ appMod.controller('adminController', ['$scope', '$http', '$window', 'DELIVERABLE
     StartSpinner();
     FetchDeliverables();
     $scope.dirty = false;
+    $scope.extraTaskFilesToBeRemoved = [];
     }
 
     $scope.DeleteTask = function(tier, task){
@@ -83,7 +84,6 @@ appMod.controller('adminController', ['$scope', '$http', '$window', 'DELIVERABLE
     $scope.SaveChanges = function(){
       var p = DELIVERABLES.save($scope.deliverables).$promise;
       p.then(function(){
-          //$scope.statusNote = "Changes saved";
           $scope.dirty = false;
           }, function(error){
           $scope.statusNote = error.status + ": " + error.data;
@@ -98,15 +98,46 @@ appMod.controller('adminController', ['$scope', '$http', '$window', 'DELIVERABLE
       return a;
     }
 
+    function RemoveTask(t){
+      var p = REMOVETASKFILE.save(t).$promise;
+      p.then(function(){
+          }, function(error){
+          $scope.statusNote = error.status + ": " + error.data;});
+      return p;
+    }
+    $scope.RemoveClicked = function(t){
+      RemoveTask(t).then(function(){
+          $scope.statusNote = "File removed.";
+          t.FileName = "";
+          t.BlobKey = "";
+          $scope.SaveChanges();
+          }, function(error){
+          $scope.statusNote = error.status + ": " + error.data;
+          });
+    }
+
     $scope.ViewClicked = function(t) {
       var unquotedBlobKey = stripquotes(t.BlobKey);
       $window.open('/serve?BlobKey='+unquotedBlobKey, '_blank');
       return;
     }
 
+    function PurgeExtraTaskFiles(){
+      angular.forEach($scope.extraTaskFilesToBeRemoved, function(t, _){
+          RemoveTask(t).then(function(){}, function(error){
+            $scope.statusNote = "Error: File not removed for task " + t.Name + " Got the error: " + error.status + ": " + error.data;
+            });
+          });
+    }
+    $scope.StartUploadAnimationForTask = function(t){ t.uploading = true; }
+    $scope.StopUploadAnimationForTask = function(t){ t.uploading = false; }
+    $scope.UploadInProgress = function(t){return !t.uploading;}
     $scope.UploadClicked = function(t) {
-      var fl = t.file;
-      t.FileName = t.file.name; //Can't find a better place to assign this.
+      $scope.StartUploadAnimationForTask(t);
+      var fl = t.localFile;
+      if (t.FileName){
+        $scope.extraTaskFilesToBeRemoved.push(angular.copy(t));
+      }
       if (fl != null){
         var fd = new FormData();
         fd.append('file', fl);
@@ -123,8 +154,6 @@ appMod.controller('adminController', ['$scope', '$http', '$window', 'DELIVERABLE
         function UploadFile(url){
           var p = $http.post(url.Path, fd, { transformRequest: angular.identity, headers: {'Content-Type': undefined} });
           p.then(function(blobKeyData){
-              $scope.statusNote = "File uploaded successfully.";
-              console.log(blobKeyData);
               }, function(error){
               $scope.statusNote = error.status + ": " + error.data;
               });
@@ -132,16 +161,26 @@ appMod.controller('adminController', ['$scope', '$http', '$window', 'DELIVERABLE
         }
 
         function AssignBlobKey(blobKeyData){
-          t.BlobKey = blobKeyData.data;
-          $scope.statusNote = "Assigned the blobKey: " + blobKeyData.data;
+          t.BlobKey = stripquotes(blobKeyData.data);
+          t.FileName = t.localFile.name;
+          t.localFile = {};
           return;
         }
-        GetUploadURL().then(UploadFile).then(AssignBlobKey).then($scope.SaveChanges);
+        GetUploadURL().then(UploadFile).then(AssignBlobKey).then($scope.SaveChanges).then(function(){
+            $scope.statusNote = "File saved.";
+            }).then(PurgeExtraTaskFiles).then(function(){$scope.StopUploadAnimationForTask(t);});
 
       }// if
       else{
         $scope.statusNote = "No file selected.";
       }
+    }
+
+    $scope.ServerFileAvailable = function(t){
+      return t.FileName;
+    }
+    $scope.LocalFileAvailable = function(t){
+      return t.localFile && t.localFile.name;
     }
 
 }]);
@@ -179,19 +218,24 @@ appMod.controller('adminController', ['$scope', '$http', '$window', 'DELIVERABLE
                     <div class="input-group">
                       <span class="input-group-btn">
                         <span class="pull-left btn btn-default btn-primary" onclick="$(this).parent().find('input[type=file]').click();">Browse</span>
-                        <!--
-                        <input name="uploaded_file" onchange="$(this).parent().parent().find('.form-control').html($(this).val().split(/[\\|/]/).pop());" style="display: none;" type="file" file-model="t.file" >
--->
-                        <input name="uploaded_file" style="display: none;" type="file" file-model="t.file" >
+                        <input name="uploaded_file" style="display: none;" type="file" file-model="t.localFile" >
                       </span>
-                      <span ng-if="t.file.name != undefined" class="form-control" ng-bind="t.file.name"></span>
-                      <span ng-if="t.file.name == undefined " class="form-control" ng-bind="t.FileName"></span>
+                      <span ng-if="LocalFileAvailable(t)" class="form-control" ng-bind="t.localFile.name"></span>
+                      <span ng-if="!LocalFileAvailable(t)" class="form-control" ng-bind="t.FileName"></span>
                     </div>
                   </span>
 
-                  <span class="clearfix col-xs-6 col-sm-2"><button ng-click="UploadClicked(t)" class="pull-left btn btn-default">Upload</button></span>
-                  <span class="clearfix col-xs-6 col-sm-2"><button ng-click="ViewClicked(t)" class="pull-left btn btn-default">View</button></span>
-                  <span class="clearfix col-xs-6 col-sm-2"><button class="pull-left btn btn-default">Remove</button></span>
+                  <span class="clearfix col-xs-6 col-sm-2">
+                    <div ng-if="UploadInProgress(t)">
+                      <button ng-disabled="!LocalFileAvailable(t)" ng-click="UploadClicked(t)" class="pull-left btn btn-default">Upload</button>
+                    </div>
+                    <div ng-if="!UploadInProgress(t)" class="progress">
+                      <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width:100%">
+                      </div>
+                    </div>
+                  </span>
+                  <span class="clearfix col-xs-6 col-sm-2"><button ng-disabled="!ServerFileAvailable(t)" ng-click="ViewClicked(t)" class="pull-left btn btn-default">View</button></span>
+                  <span class="clearfix col-xs-6 col-sm-2"><button ng-disabled="!ServerFileAvailable(t)" ng-click="RemoveClicked(t)" class="pull-left btn btn-default">Remove</button></span>
 
                   <span class="clearfix col-xs-6 col-sm-2">
                     <a class="clearfix" title="Delete Task" ng-click="DeleteTask(tier, t)">
@@ -203,7 +247,6 @@ appMod.controller('adminController', ['$scope', '$http', '$window', 'DELIVERABLE
               </div>
 
             </ul>
-
 
             <div class="col-sm-6 col-xs-12">
               <input class="form-control" placeholder="New Task..." ng-model="orphanTask.Name">

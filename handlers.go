@@ -77,6 +77,7 @@ func pageHandler(w http.ResponseWriter, r *http.Request) {
 	if err := t.ExecuteTemplate(w, "base", data); err != nil {
 		c := appengine.NewContext(r)
 		c.Errorf("%v", err.Error())
+		c.Errorf("Error happened while serving" + r.URL.Path)
 		CLWAReportErrorThroughMail(r, "Error happended while serving"+r.URL.Path, err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}

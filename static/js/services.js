@@ -7,7 +7,12 @@ clAppServices.factory('DELIVERABLES', ['$resource', function($resource){
 
 
 clAppServices.factory('UPLOADURL', ['$resource', function($resource){
-  return $resource('/admin/api/upload',{},{
+  return $resource('/admin/api/uploadurl',{},{
+  } );
+}]);
+
+clAppServices.factory('REMOVETASKFILE', ['$resource', function($resource){
+  return $resource('/admin/api/removetaskfile',{},{
   } );
 }]);
 
