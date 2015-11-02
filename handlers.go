@@ -2,11 +2,13 @@ package climatic_webapp
 
 import (
 	"encoding/json"
-	"github.com/gorilla/mux"
 	"html/template"
 	"net/http"
 
+	"github.com/gorilla/mux"
+
 	"appengine"
+	"appengine/blobstore"
 )
 
 type gaeHandler func(c appengine.Context, w http.ResponseWriter, r *http.Request) (interface{}, error)
@@ -61,6 +63,7 @@ func initStaticHTMLUrlMaps() {
 func init() {
 	initStaticHTMLUrlMaps()
 	http.Handle("/", router)
+	http.HandleFunc("/serve", ServeFile)
 }
 
 func pageHandler(w http.ResponseWriter, r *http.Request) {
@@ -77,4 +80,11 @@ func pageHandler(w http.ResponseWriter, r *http.Request) {
 		CLWAReportErrorThroughMail(r, "Error happended while serving"+r.URL.Path, err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
+}
+
+func ServeFile(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+	bk := r.FormValue("BlobKey")
+	PrintInBox(appengine.NewContext(r), "Got the BlobKey as ", bk)
+	blobstore.Send(w, appengine.BlobKey(bk))
 }

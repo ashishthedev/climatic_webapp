@@ -6,7 +6,8 @@ clAppServices.factory('DELIVERABLES', ['$resource', function($resource){
 }]);
 
 
-clAppServices.factory('UploadUrl', ['$resource', function($resource){
-  return $resource('/admin/api/UploadUrl',{},{
+clAppServices.factory('UPLOADURL', ['$resource', function($resource){
+  return $resource('/admin/api/upload',{},{
   } );
 }]);
+

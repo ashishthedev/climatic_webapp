@@ -6,49 +6,36 @@
 <script src="/static/js/services.js"></script>
 
 <script>
+"use strict";
 var appMod = angular.module('clapp', ['clAppServices']);
 
 appMod.config(function($interpolateProvider) {
     $interpolateProvider.startSymbol('||');
     $interpolateProvider.endSymbol('||');
     });
-appMod.directive("fileread", [function () {
+
+
+
+appMod.directive('fileModel', ['$parse', '$http',  function ($parse, $http) {
     return {
-scope: {
-fileread: "="
-},
-link: function (scope, element, attributes) {
-element.bind("change", function (changeEvent) {
-  var reader = new FileReader();
-  reader.onload = function (loadEvent) {
-  scope.$apply(function () {
-    scope.fileread = loadEvent.target.result;
+restrict: 'A',
+link: function(scope, element, attrs) {
+var model = $parse(attrs.fileModel);
+var modelSetter = model.assign;
+
+element.bind('change', function(){
+  scope.$apply(function(){
+    var fl = element[0].files[0];
+    modelSetter(scope, fl);
     });
-  }
-  reader.readAsDataURL(changeEvent.target.files[0]);
   });
 }
 }
 }]);
 
-appMod.service('fileUpload', ['$http', function ($http) {
-    this.uploadFileToUrl = function(file, uploadUrl){
-    var fd = new FormData();
-    fd.append('file', file);
-    $http.post(uploadUrl, fd, {
-transformRequest: angular.identity,
-headers: {'Content-Type': undefined}//TODO: Checkout if content-type can be left alone?
-})
-    .success(function(){
-      })
-    .error(function(){
-      });
-    }
-    }]);
+appMod.controller('adminController', ['$scope', '$http', '$window', 'DELIVERABLES', 'UPLOADURL', function($scope, $http, $window, DELIVERABLES, UPLOADURL) {
 
-appMod.controller('adminController', ['$scope', 'DELIVERABLES', 'UploadUrl', function($scope, DELIVERABLES, UploadUrl) {
-
-    FetchDeliverables = function(){
+    function FetchDeliverables(){
     var p = DELIVERABLES.get().$promise;
     p.then(function(deliverables){
       $scope.deliverables = deliverables;
@@ -59,23 +46,20 @@ appMod.controller('adminController', ['$scope', 'DELIVERABLES', 'UploadUrl', fun
       });
     return p;
     }
-    StopSpinner = function(){
-    $scope.working = false;
-    }
-    StartSpinner = function(){
-    $scope.working = true;
-    }
+
+    function StopSpinner(){ $scope.working = false; }
+    function StartSpinner(){ $scope.working = true; }
     init();
 
     function init(){
-      StartSpinner();
-      FetchDeliverables();
-      $scope.dirty = false;
+    StartSpinner();
+    FetchDeliverables();
+    $scope.dirty = false;
     }
 
     $scope.DeleteTask = function(tier, task){
       var newTasks = [];
-      for(i=0; i<tier.Tasks.length; i++){
+      for(var i=0; i<tier.Tasks.length; i++){
         var x = tier.Tasks[i];
         if (x.Name != task.Name){
           newTasks.push(x);
@@ -85,8 +69,10 @@ appMod.controller('adminController', ['$scope', 'DELIVERABLES', 'UploadUrl', fun
         }
       }
       tier.Tasks = newTasks;
+      $scope.dirty = true;
 
     }
+
     $scope.addOrphanTask = function(tier, orphanTask){
       tier.Tasks = tier.Tasks || [];
       tier.Tasks.push(angular.copy(orphanTask));
@@ -97,12 +83,65 @@ appMod.controller('adminController', ['$scope', 'DELIVERABLES', 'UploadUrl', fun
     $scope.SaveChanges = function(){
       var p = DELIVERABLES.save($scope.deliverables).$promise;
       p.then(function(){
-          $scope.statusNote = "Changes saved";
+          //$scope.statusNote = "Changes saved";
           $scope.dirty = false;
           }, function(error){
           $scope.statusNote = error.status + ": " + error.data;
           });
       return p;
+    }
+
+    function stripquotes(a) {
+      if (a[0]=='"' && a[a.length-2]=='"'){
+        return a.substr(1, a.length-3);
+      }
+      return a;
+    }
+
+    $scope.ViewClicked = function(t) {
+      var unquotedBlobKey = stripquotes(t.BlobKey);
+      $window.open('/serve?BlobKey='+unquotedBlobKey, '_blank');
+      return;
+    }
+
+    $scope.UploadClicked = function(t) {
+      var fl = t.file;
+      t.FileName = t.file.name; //Can't find a better place to assign this.
+      if (fl != null){
+        var fd = new FormData();
+        fd.append('file', fl);
+
+        function GetUploadURL(){
+          var p = UPLOADURL.get().$promise;
+          p.then(function(url){
+              }, function(error){
+              $scope.statusNote = "Error while getting the upload url";
+              });
+          return p;
+        }
+
+        function UploadFile(url){
+          var p = $http.post(url.Path, fd, { transformRequest: angular.identity, headers: {'Content-Type': undefined} });
+          p.then(function(blobKeyData){
+              $scope.statusNote = "File uploaded successfully.";
+              console.log(blobKeyData);
+              }, function(error){
+              $scope.statusNote = error.status + ": " + error.data;
+              });
+          return p;
+        }
+
+        function AssignBlobKey(blobKeyData){
+          t.BlobKey = blobKeyData.data;
+          $scope.statusNote = "Assigned the blobKey: " + blobKeyData.data;
+          return;
+        }
+        GetUploadURL().then(UploadFile).then(AssignBlobKey).then($scope.SaveChanges);
+
+      }// if
+      else{
+        $scope.statusNote = "No file selected.";
+      }
     }
 
 }]);
@@ -136,21 +175,27 @@ appMod.controller('adminController', ['$scope', 'DELIVERABLES', 'UploadUrl', fun
               <div class=" clearfix form-group">
                 <label class="col-xs-12 col-sm-2 control-label"><span ng-bind="t.Name"></span></label>
                 <div class="col-xs-12 col-sm-10">
-                  <span class="col-xs-12 col-sm-6">
+                  <span class="col-xs-12 col-sm-4">
                     <div class="input-group">
                       <span class="input-group-btn">
-                        <span class="btn btn-default btn-primary" onclick="$(this).parent().find('input[type=file]').click();">Browse</span>
-                        <input name="uploaded_file" onchange="$(this).parent().parent().find('.form-control').html($(this).val().split(/[\\|/]/).pop());" style="display: none;" type="file">
+                        <span class="pull-left btn btn-default btn-primary" onclick="$(this).parent().find('input[type=file]').click();">Browse</span>
+                        <!--
+                        <input name="uploaded_file" onchange="$(this).parent().parent().find('.form-control').html($(this).val().split(/[\\|/]/).pop());" style="display: none;" type="file" file-model="t.file" >
+-->
+                        <input name="uploaded_file" style="display: none;" type="file" file-model="t.file" >
                       </span>
-                      <span class="form-control"></span>
+                      <span ng-if="t.file.name != undefined" class="form-control" ng-bind="t.file.name"></span>
+                      <span ng-if="t.file.name == undefined " class="form-control" ng-bind="t.FileName"></span>
                     </div>
                   </span>
 
-                  <span class="clearfix col-xs-6 col-sm-3"><button class="btn btn-default">Remove</button></span>
+                  <span class="clearfix col-xs-6 col-sm-2"><button ng-click="UploadClicked(t)" class="pull-left btn btn-default">Upload</button></span>
+                  <span class="clearfix col-xs-6 col-sm-2"><button ng-click="ViewClicked(t)" class="pull-left btn btn-default">View</button></span>
+                  <span class="clearfix col-xs-6 col-sm-2"><button class="pull-left btn btn-default">Remove</button></span>
 
-                  <span class="clearfix pull-right col-sm-3 col-xs-6">
-                    <a ng-click="DeleteTask(tier, t)">
-                      <span class="glyphicon glyphicon-remove"></span>
+                  <span class="clearfix col-xs-6 col-sm-2">
+                    <a class="clearfix" title="Delete Task" ng-click="DeleteTask(tier, t)">
+                      <span class="pull-right glyphicon glyphicon-remove"></span>
                     </a>
                   </span>
 

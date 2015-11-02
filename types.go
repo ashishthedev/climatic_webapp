@@ -1,8 +1,9 @@
 package climatic_webapp
 
 import (
-	"appengine"
 	"encoding/json"
+
+	"appengine"
 )
 
 type Deliverables struct {
@@ -22,8 +23,9 @@ type Tier struct {
 }
 
 type Task struct {
-	Name    string
-	BlobKey appengine.BlobKey
+	Name     string
+	FileName string
+	BlobKey  appengine.BlobKey
 }
 
 type UploadUrl struct {
@@ -31,7 +33,7 @@ type UploadUrl struct {
 }
 
 type DeliverablesAsString struct {
-	S string
+	S string `datastore:",noindex"`
 }
 
 func (d *Deliverables) FromString(c appengine.Context, s string) error {
