@@ -1,23 +1,129 @@
 {{define "title" }}<title>Climatic Adaptation</title>{{end}}
 {{define "pageSpecificScripts" }}
+<script src="/static/js/angular/1.3.14/angular.min.js"></script>
+<script src="/static/js/angular/1.3.14/angular-resource.min.js"></script>
+<script src="/static/js/services.js"></script>
 <script src="/static/js/Chart.min.js"></script>
+<script>
+"use strict";
+var appMod = angular.module('clapp', ['clAppServices']);
+
+appMod.config(function($interpolateProvider) {
+    $interpolateProvider.startSymbol('||');
+    $interpolateProvider.endSymbol('||');
+    });
+
+appMod.controller('chartPageController', ['$scope', '$http', '$window', 'DELIVERABLES', function($scope, $http, $window, DELIVERABLES) {
+    function FetchDeliverables(){
+    var p = DELIVERABLES.get().$promise;
+    p.then(function(deliverables){
+      $scope.deliverables = deliverables;
+      StopSpinner();
+      }, function(error){
+      $scope.statusNote = error.status + ": " + error.data;
+      StopSpinner();
+      });
+    return p;
+    }
+
+    function GetPercentageCompletionOfTierInModule(m, tierName){
+    var tier = GetTierFromModule(m, tierName);
+    var noOfTasks = tier.Tasks.length;
+    if (noOfTasks == 0){return 100;}
+
+    var noOfCompletedTasks = 0;
+    angular.forEach(tier.Tasks, function(t, _){
+      if (t.BlobKey != ""){ noOfCompletedTasks +=1;}
+      });
+    return Math.floor(noOfCompletedTasks*100/noOfTasks);
+    }
+
+    function GetTierFromModule(m, tierName){
+      var result = {}
+      angular.forEach(m.Tiers, function(tier, _){
+          if (tier.Name == tierName){
+          result = angular.copy(tier);
+          }
+          });
+      return result
+    }
+
+    function InitializeChartData(){
+      $scope.chartDataForAllTiers = [];
+      $scope.tierNames = [];
+      angular.forEach($scope.deliverables.Modules, function(m, _){
+          //Find all the tiers present
+          var skipRest = false;
+          if(!skipRest){
+          angular.forEach(m.Tiers, function(t, _){
+            $scope.tierNames.push(angular.copy(t.Name));
+            });
+          skipRest = true;
+          }
+          });
+
+      angular.forEach($scope.tierNames, function(tn, _){
+          var singleTier = {};
+          singleTier.Name = tn;
+          singleTier.chartData = [];
+          angular.forEach($scope.deliverables.Modules, function(m, _){
+            var t = GetTierFromModule(m, tn);
+            var dataForSingleModule = {};
+            dataForSingleModule.value = GetPercentageCompletionOfTierInModule(m, tn);
+            dataForSingleModule.color ="#F7464A";
+            dataForSingleModule.highlight = "#FF5A5E";
+            dataForSingleModule.label = m.Name;
+            singleTier.chartData.push(dataForSingleModule);
+            });
+          $scope.chartDataForAllTiers.push(singleTier);
+          });
+
+      angular.forEach($scope.chartDataForAllTiers, function(singleTier, _){
+          var skipRest = false;
+          if (!skipRest){
+          alert("Drawing chart for " + singleTier.Name);
+          var ctx = document.getElementById(singleTier.Name).getContext("2d");
+          var myNewChart = new Chart(ctx).PolarArea(singleTier.chartData, {responsive:true});
+          skipRest = true; //TODO: Remove this line after testing.
+          console.log(singleTier.chartData);
+          }else{
+          alert("Skipping " + singleTier.Name);
+          }
+          });
+    }
+
+    function StopSpinner(){ $scope.working = false; }
+    function StartSpinner(){ $scope.working = true; }
+    function init(){
+      StartSpinner();
+      FetchDeliverables().then(InitializeChartData);
+    }
+
+
+    init();
+
+
+}]);
+
+</script>
 {{end}}
 
 {{define "bodyContainer" }}
 
+<div ng-app="clapp" ng-controller="chartPageController">
+  <div class="container">
+    <h3>Tier1</h3>
+    <canvas id="T1" width="400" height="400"></canvas>
+    <hr>
+    <h3>Tier2</h3>
+    <canvas id="tier2" width="400" height="400"></canvas>
+    <hr>
+    <h3>Tier3</h3>
+    <canvas id="tier3" width="400" height="400"></canvas>
+    <hr>
+  </div>
 
-<div class="container">
-  <h3>Tier1</h3>
-  <canvas id="tier1" width="400" height="400"></canvas>
-  <hr>
-  <h3>Tier2</h3>
-  <canvas id="tier2" width="400" height="400"></canvas>
-  <hr>
-  <h3>Tier3</h3>
-  <canvas id="tier3" width="400" height="400"></canvas>
-  <hr>
-</div>
-<script>
+  <script>
 var data = [
 {
 value: 100,
@@ -71,11 +177,12 @@ value: 50,
 ];
 
 var tiers = ["tier1", "tier2", "tier3"];
-
 for(var i in tiers){
-  var ctx = document.getElementById(tiers[i]).getContext("2d");
-  var myNewChart = new Chart(ctx).PolarArea(data);
+  //var ctx = document.getElementById(tiers[i]).getContext("2d");
+  //var myNewChart = new Chart(ctx).PolarArea(data);
 }
-</script>
+
+  </script>
+</div>
 
 {{end}}
