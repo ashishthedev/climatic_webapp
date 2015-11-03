@@ -49,6 +49,21 @@ appMod.controller('chartPageController', ['$scope', '$http', '$window', 'DELIVER
       return result
     }
 
+    function GetHighlightColor(){
+      return "#7D5360";
+    }
+    function GetNextPieColor(n){
+      var listOfColors = [
+        "#F7464A",
+        "#46BFBD",
+        "#FDB45C",
+        "#949FB1",
+        "#4D5360",
+        "#4D53E0",
+        "#4DA360",
+        ];
+      return listOfColors[ n % listOfColors.length];
+    }
     function InitializeChartData(){
       $scope.chartDataForAllTiers = [];
       $scope.tierNames = [];
@@ -67,12 +82,12 @@ appMod.controller('chartPageController', ['$scope', '$http', '$window', 'DELIVER
           var singleTier = {};
           singleTier.Name = tn;
           singleTier.chartData = [];
-          angular.forEach($scope.deliverables.Modules, function(m, _){
+          angular.forEach($scope.deliverables.Modules, function(m, i){
             var t = GetTierFromModule(m, tn);
             var dataForSingleModule = {};
             dataForSingleModule.value = GetPercentageCompletionOfTierInModule(m, tn);
-            dataForSingleModule.color ="#F7464A";
-            dataForSingleModule.highlight = "#FF5A5E";
+            dataForSingleModule.color = GetNextPieColor(i);
+            dataForSingleModule.highlight = GetHighlightColor();
             dataForSingleModule.label = m.Name;
             singleTier.chartData.push(dataForSingleModule);
             });
