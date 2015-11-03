@@ -131,7 +131,7 @@ appMod.controller('adminController', ['$scope', '$http', '$window', 'DELIVERABLE
     }
     $scope.StartUploadAnimationForTask = function(t){ t.uploading = true; }
     $scope.StopUploadAnimationForTask = function(t){ t.uploading = false; }
-    $scope.UploadInProgress = function(t){return !t.uploading;}
+    $scope.UploadInProgress = function(t){return t.uploading;}
     $scope.UploadClicked = function(t) {
       $scope.StartUploadAnimationForTask(t);
       var fl = t.localFile;
@@ -226,10 +226,10 @@ appMod.controller('adminController', ['$scope', '$http', '$window', 'DELIVERABLE
                   </span>
 
                   <span class="clearfix col-xs-6 col-sm-2">
-                    <div ng-if="UploadInProgress(t)">
+                    <div ng-if="!UploadInProgress(t)">
                       <button ng-disabled="!LocalFileAvailable(t)" ng-click="UploadClicked(t)" class="pull-left btn btn-default">Upload</button>
                     </div>
-                    <div ng-if="!UploadInProgress(t)" class="progress">
+                    <div ng-if="UploadInProgress(t)" class="progress">
                       <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width:100%">
                       </div>
                     </div>
