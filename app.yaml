@@ -2,6 +2,10 @@ application: climaticwebapp
 version: live
 runtime: go
 api_version: go1
+instance_class: F1
+automatic_scaling:
+  min_idle_instances: 1
+  max_idle_instances: 1
 
 # Handlers define how to route requests to your application.
 handlers:

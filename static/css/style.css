@@ -13,9 +13,7 @@
   margin-bottom: 40px;
 }
 
-.mw-600{
-  max-width: 600px;
-}
+.mw-chart{ max-width: 70%; }
 
 .navbar-inverse {
   background-color: #18bc9c;
@@ -73,6 +71,7 @@
   color: #ffffff;
 }
 @media (max-width: 767px) {
+  .mw-chart{ max-width: 90%; }
   .navbar-inverse .navbar-nav .open .dropdown-menu > .dropdown-header {
     border-color: transparent;
   }

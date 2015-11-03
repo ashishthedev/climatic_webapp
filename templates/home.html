@@ -79,6 +79,7 @@ appMod.controller('chartPageController', ['$scope', '$http', '$window', 'DELIVER
           $scope.chartDataForAllTiers.push(singleTier);
           });
 
+      StopSpinner();
       angular.forEach($scope.chartDataForAllTiers, function(singleTier, _){
           var skipRest = false;
           if (!skipRest){
@@ -91,8 +92,10 @@ appMod.controller('chartPageController', ['$scope', '$http', '$window', 'DELIVER
           });
     }
 
-    function StopSpinner(){ $scope.working = false; }
-    function StartSpinner(){ $scope.working = true; }
+    function StopSpinner(){ $scope.working = false;
+    }
+    function StartSpinner(){ //$scope.working = true;
+    }
     function init(){
       StartSpinner();
       FetchDeliverables().then(InitializeChartData);
@@ -112,17 +115,24 @@ appMod.controller('chartPageController', ['$scope', '$http', '$window', 'DELIVER
 <div ng-app="clapp" ng-controller="chartPageController">
   <div class="container">
 
-    {{range $tier:= .TierNames}}
-    <h3>{{ $tier}}</h3>
-    <div class="mw-600">
-      <canvas id="{{ $tier }}"></canvas>
+    <div ng-show="working">
+      <img class="center-block" src="/static/img/working.gif" />
     </div>
-    <hr>
-    {{end}}
+
+    <div ng-show="!working">
+      {{range $tier:= .TierNames}}
+      <h3>{{ $tier}}</h3>
+      <div class="mw-chart">
+        <canvas id="{{ $tier }}"></canvas>
+      </div>
+      <hr>
+      {{end}}
+    </div>
   </div>
 
   <script>
 
+//Sample values of chart data
 //var data = [
 //{
 //value: 100,

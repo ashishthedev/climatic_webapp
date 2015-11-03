@@ -81,7 +81,7 @@ gcloudlogin = gcloud auth login --no-launch-browser
 gproj = pushd %XDATDOCSDIR%\app
 goliveproj = pushd %XDATDOCSDIR% && goapp test && appcfg.py update . --email="ashishthedev@gmail.com" --version="live" --noauth_local_webserver --oauth2 $*
 
-godevproj = pushd %XDATDOCSDIR%\app && goapp test && appcfg.py update . --email="ashishthedev@gmail.com" --version="dev" --noauth_local_webserver --oauth2 $*
+godevproj = pushd %XDATDOCSDIR%\ && goapp test && appcfg.py update . --email="ashishthedev@gmail.com" --version="dev" --noauth_local_webserver --oauth2 $*
 godevprojnotest = pushd %XDATDOCSDIR%\app && appcfg.py update . --email="ashishthedev@gmail.com" --version="dev" --noauth_local_webserver --oauth2 $*
 
 godemoproj = pushd %XDATDOCSDIR%\app && goapp test && appcfg.py update . --email="ashishthedev@gmail.com" --version="demo" --noauth_local_webserver --oauth2 $*
