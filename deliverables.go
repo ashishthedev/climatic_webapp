@@ -28,9 +28,7 @@ func deliverablesKey(c appengine.Context, orgName string) *datastore.Key {
 	return datastore.NewKey(c, "DeliverablesAsString", "deliverables_keyID", 0, orgKey(c, orgName))
 }
 
-func (m DeliverablesRes) Get(c appengine.Context, r *http.Request) (interface{}, error) {
-	c.Infof("inside DeliverablesRes get")
-	orgName := "Org1" //TODO: Handle with sessions?
+func GetDeliverables(c appengine.Context, orgName string) (*Deliverables, error) {
 
 	das := new(DeliverablesAsString)
 	k := deliverablesKey(c, orgName)
@@ -47,6 +45,14 @@ func (m DeliverablesRes) Get(c appengine.Context, r *http.Request) (interface{},
 		return nil, err
 	}
 	return d, nil
+}
+
+func (m DeliverablesRes) Get(c appengine.Context, r *http.Request) (interface{}, error) {
+	c.Infof("inside DeliverablesRes get")
+	orgName := "Org1" //TODO: Handle with sessions?
+
+	return GetDeliverables(c, orgName)
+
 }
 
 func (m DeliverablesRes) Post(c appengine.Context, r *http.Request) (interface{}, error) {

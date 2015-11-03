@@ -28,6 +28,7 @@ appMod.controller('chartPageController', ['$scope', '$http', '$window', 'DELIVER
 
     function GetPercentageCompletionOfTierInModule(m, tierName){
     var tier = GetTierFromModule(m, tierName);
+    tier.Tasks = tier.Tasks || [];
     var noOfTasks = tier.Tasks.length;
     if (noOfTasks == 0){return 100;}
 
@@ -81,13 +82,11 @@ appMod.controller('chartPageController', ['$scope', '$http', '$window', 'DELIVER
       angular.forEach($scope.chartDataForAllTiers, function(singleTier, _){
           var skipRest = false;
           if (!skipRest){
-          alert("Drawing chart for " + singleTier.Name);
           var ctx = document.getElementById(singleTier.Name).getContext("2d");
           var myNewChart = new Chart(ctx).PolarArea(singleTier.chartData, {responsive:true});
-          skipRest = true; //TODO: Remove this line after testing.
+          //skipRest = true; //TODO: Remove this line after testing.
+          console.log(singleTier.Name);
           console.log(singleTier.chartData);
-          }else{
-          alert("Skipping " + singleTier.Name);
           }
           });
     }
@@ -112,76 +111,76 @@ appMod.controller('chartPageController', ['$scope', '$http', '$window', 'DELIVER
 
 <div ng-app="clapp" ng-controller="chartPageController">
   <div class="container">
-    <h3>Tier1</h3>
-    <canvas id="T1" width="400" height="400"></canvas>
+
+    {{range $tier:= .TierNames}}
+    <h3>{{ $tier}}</h3>
+    <div class="mw-600">
+      <canvas id="{{ $tier }}"></canvas>
+    </div>
     <hr>
-    <h3>Tier2</h3>
-    <canvas id="tier2" width="400" height="400"></canvas>
-    <hr>
-    <h3>Tier3</h3>
-    <canvas id="tier3" width="400" height="400"></canvas>
-    <hr>
+    {{end}}
   </div>
 
   <script>
-var data = [
-{
-value: 100,
-         color:"#F7464A",
-         highlight: "#FF5A5E",
-         label: "Orientation"
-},
-{
-value: 50,
-       color: "#46BFBD",
-       highlight: "#5AD3D1",
-       label: "Governance"
-},
-{
-value: 60,
-       color: "#FDB45C",
-       highlight: "#FFC870",
-       label: "Scope"
-},
-{
-value: 100,
-       color: "#949FB1",
-       highlight: "#A8B3C5",
-       label: "Risk Analysis"
-},
-{
-value: 20,
-       color: "#4D5360",
-       highlight: "#616774",
-       label: "Resilience Plan"
-},
-{
-value: 30,
-       color: "#4D53E0",
-       highlight: "#616774",
-       label: "Business Case"
-},
-{
-value: 40,
-       color: "#4DA360",
-       highlight: "#616774",
-       label: "Implementation"
-},
-{
-value: 50,
-       color: "#7D5360",
-       highlight: "#616774",
-       label: "Evolution"
-}
 
-];
-
-var tiers = ["tier1", "tier2", "tier3"];
-for(var i in tiers){
-  //var ctx = document.getElementById(tiers[i]).getContext("2d");
-  //var myNewChart = new Chart(ctx).PolarArea(data);
-}
-
+//var data = [
+//{
+//value: 100,
+//         color:"#F7464A",
+//         highlight: "#FF5A5E",
+//         label: "Orientation"
+//},
+//{
+//value: 50,
+//       color: "#46BFBD",
+//       highlight: "#5AD3D1",
+//       label: "Governance"
+//},
+//{
+//value: 60,
+//       color: "#FDB45C",
+//       highlight: "#FFC870",
+//       label: "Scope"
+//},
+//{
+//value: 100,
+//       color: "#949FB1",
+//       highlight: "#A8B3C5",
+//       label: "Risk Analysis"
+//},
+//{
+//value: 20,
+//       color: "#4D5360",
+//       highlight: "#616774",
+//       label: "Resilience Plan"
+//},
+//{
+//value: 30,
+//       color: "#4D53E0",
+//       highlight: "#616774",
+//       label: "Business Case"
+//},
+//{
+//value: 40,
+//       color: "#4DA360",
+//       highlight: "#616774",
+//       label: "Implementation"
+//},
+//{
+//value: 50,
+//       color: "#7D5360",
+//       highlight: "#616774",
+//       label: "Evolution"
+//}
+//
+//];
+//
+//var tiers = ["tier1", "tier2", "tier3"];
+//for(var i in tiers){
+//  //var ctx = document.getElementById(tiers[i]).getContext("2d");
+//  //var myNewChart = new Chart(ctx).PolarArea(data);
+//}
+//
   </script>
 </div>
 

@@ -47,7 +47,7 @@ var router = new(mux.Router)
 
 func initStaticHTMLUrlMaps() {
 	urlPacks := []urlPack{
-		{"/", pageHandler, nil, []string{"templates/home.html", BASE_TEMPLATE}},
+		{"/", homePageHandler, nil, []string{"templates/home.html", BASE_TEMPLATE}},
 		{"/admin", pageHandler, nil, []string{"templates/admin_tasks.html", BASE_TEMPLATE, ADMIN_BASE}},
 		{"/admin/tasks", pageHandler, nil, []string{"templates/admin_tasks.html", BASE_TEMPLATE, ADMIN_BASE}},
 		{"/admin/modules", pageHandler, nil, []string{"templates/admin_modules.html", BASE_TEMPLATE, ADMIN_BASE}},
@@ -64,6 +64,35 @@ func init() {
 	initStaticHTMLUrlMaps()
 	http.Handle("/", router)
 	http.HandleFunc("/serve", ServeFile)
+}
+
+func homePageHandler(w http.ResponseWriter, r *http.Request) {
+	c := appengine.NewContext(r)
+	orgName := "Org1" //TODO: Handle with sessions?
+	d, err := GetDeliverables(c, orgName)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	t := PRE_BUILT_TEMPLATES_WITH_DATA[r.URL.Path].t
+	uniqueTierNames := []string{}
+	for _, m := range d.Modules {
+		for _, t := range m.Tiers {
+			uniqueTierNames = append(uniqueTierNames, t.Name)
+		}
+		break
+	}
+
+	data := struct{ TierNames []string }{uniqueTierNames}
+
+	if err := t.ExecuteTemplate(w, "base", data); err != nil {
+		c := appengine.NewContext(r)
+		c.Errorf("%v", err.Error())
+		c.Errorf("Error happened while serving" + r.URL.Path)
+		CLWAReportErrorThroughMail(r, "Error happended while serving"+r.URL.Path, err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 }
 
 func pageHandler(w http.ResponseWriter, r *http.Request) {

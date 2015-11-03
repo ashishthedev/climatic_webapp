@@ -13,6 +13,10 @@
   margin-bottom: 40px;
 }
 
+.mw-600{
+  max-width: 600px;
+}
+
 .navbar-inverse {
   background-color: #18bc9c;
   border-color: transparent;
