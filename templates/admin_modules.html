@@ -57,16 +57,19 @@ appMod.controller('adminController', ['$scope', 'DELIVERABLES', function($scope,
       $scope.dirty = true;
     }
 
-    $scope.addOrphanModule = function(m){
+    $scope.addOrphanModule = function(om){
       $scope.deliverables.Modules = $scope.deliverables.Modules || [];
       var modules = $scope.deliverables.Modules;
-      if(modules.length >0){
+      var newModule;
+      if(modules.length > 0){
         newModule = angular.copy(modules[0]);
         newModule.Tiers = angular.copy(modules[0].Tiers);
-        newModule.Name = m.Name;
+        newModule.Name = om.Name;
         angular.forEach(newModule.Tiers, function(tier, _){
             tier.Tasks = [];
             });
+      }else {
+        newModule = angular.copy(om);
       }
       $scope.deliverables.Modules.push(angular.copy(newModule));
       $scope.dirty = true;
